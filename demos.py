@@ -9,7 +9,7 @@ from manimee import *
 
 class SimpleChart(Scene):
     """
-    一个含有串联电抗器、并联电容器的简单供电系统
+    一个含有串联电抗、并联电容的简单供电系统
     manim demos.py SimpleChart -p
     """
     def construct(self):
@@ -31,3 +31,29 @@ class SimpleChart(Scene):
         t1.remove(t1.buses[1])
 
         self.add(VGroup(src, t1, x1, t2, load, c1, gnd, l1, l2, l3).move_to(ORIGIN))
+
+
+class Elements(Scene):
+    """
+    元件展示
+    manim demos.py Elements -p
+    """
+    def construct(self):
+        g = VGroup(
+            Bus(),
+            Gnd(),
+            Voltage(),
+            Impedance(),
+            Inductance(),
+            Capacitor(),
+            Source(),
+            Transformer2(),
+            Transformer3(),
+            AutoTransformer2(),
+            Load(),
+            Reactor(),
+        )
+        g.arrange_in_grid()
+        self.add(g)
+
+
