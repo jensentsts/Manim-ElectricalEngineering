@@ -2,28 +2,93 @@
 # @Time    : 2024/12/30 下午9:23
 # @Author  : jensentsts
 # @File    : test.py
-# @Description : 测试文件
+# @Description : 效果测试文件
 from manim import *
 
-RADICAL = 0.3
-LINE_LENGTH = 0.3
-BUS_LENGTH = RADICAL * 1.6
-TRIANGLE_SCALE = 0.15
+CIRCLE_RADIUS: float = 0.3                  # 圆形的默认半径
+LINE_LENGTH: float = 0.3                    # 引出线默认长度
+BUS_LENGTH: float = CIRCLE_RADIUS * 1.6     # 母线默认长度
+LOAD_TRIANGLE_SCALE: float = 0.15           # 负荷符号三角形 相对于 Manim默认三角形 的缩放比例
+VOLTAGE_OUTER_RADIUS: float = 0.1           # 电压圆环默认外径
 
-NORMAL_COLOR = YELLOW_D
+NORMAL_COLOR: ManimColor = YELLOW_D         # 特殊颜色的默认颜色
 
 
 class Bus(Line):
-    def __init__(self, buff=0, path_arc=None, **kwargs):
-        """母线"""
+    def __init__(self,
+                 buff=0,
+                 path_arc=None,
+                 **kwargs):
+        """
+        母线
+        :param buff: 同 Line
+        :param path_arc: 同 Line
+        :param kwargs: 同 Line
+        """
         super().__init__(ORIGIN, [0, BUS_LENGTH, 0], buff, path_arc, **kwargs)
+
+
+class Voltage(Annulus):
+    def __init__(self,
+                 voltage_level: float = 0,
+                 voltage: complex = 0):
+        """
+        电压可视化
+        :param voltage_level: 电压等级
+        :param voltage: 实际电压
+        """
+        super().__init__(inner_radius=0, outer_radius=VOLTAGE_OUTER_RADIUS)
+        self._voltage_level: float = voltage_level
+        self._voltage: complex = 0
+        self.voltage = voltage
+
+    def _rectify_radius(self):
+        self.clear_points()
+        if self.voltage_level <= 0:
+            self.outer_radius = VOLTAGE_OUTER_RADIUS
+            self.inner_radius = 0
+        else:
+            self.outer_radius = abs(self.voltage) / self.voltage_level * VOLTAGE_OUTER_RADIUS
+            if self.voltage.real == 0:
+                self.inner_radius = self.outer_radius - 0.001
+            else:
+                self.inner_radius = self.voltage.imag / self.voltage.real * self.outer_radius
+        self.generate_points()
+
+    @property
+    def voltage_level(self) -> float:
+        """电压等级"""
+        return self._voltage_level
+
+    @voltage_level.setter
+    def voltage_level(self,
+                      voltage_level: float):
+        self._voltage_level = voltage_level
+        self._rectify_radius()
+
+    @property
+    def voltage(self) -> complex:
+        """实际电压"""
+        return self._voltage
+
+    @voltage.setter
+    def voltage(self,
+                voltage: complex):
+        self._voltage = voltage
+        self._rectify_radius()
+
+    def set_voltage(self, voltage: complex):
 
 
 class Impedance(VGroup):
     def __init__(self,
                  *vmobjects,
                  **kwargs):
-        """电阻/阻抗/导纳"""
+        """
+        电阻/阻抗/导纳
+        :param vmobjects: 同 VGroup
+        :param kwargs: 同 VGroup
+        """
         super().__init__(*vmobjects, **kwargs)
         # 阻抗符号（主体）
         self.rectangle: Rectangle = Rectangle(WHITE, LINE_LENGTH, LINE_LENGTH * 2.25)
@@ -41,7 +106,12 @@ class Inductance(VGroup):
                  arc_amount: int = 5,
                  *vmobjects,
                  **kwargs):
-        """电感"""
+        """
+        电感
+        :param arc_amount: 圆弧数量
+        :param vmobjects: 同 VGroup
+        :param kwargs: 同 VGroup
+        """
         super().__init__(*vmobjects, **kwargs)
         # 电感符号的圆弧
         self.arcs: list[Arc] = []
@@ -62,7 +132,11 @@ class Capacitor(VGroup):
     def __init__(self,
                  *vmobjects,
                  **kwargs):
-        """电容"""
+        """
+        电容
+        :param vmobjects: 同 VGroup
+        :param kwargs: 同 VGroup
+        """
         super().__init__(*vmobjects, **kwargs)
         # 电容符号的极板
         self.p1: Line = Line([LINE_LENGTH / 2, 0, 0], [LINE_LENGTH / 2, LINE_LENGTH * 2, 0])
@@ -77,9 +151,18 @@ class Capacitor(VGroup):
         self.move_to(ORIGIN)
 
 
-class WithBuses:
-    def __init__(self, bus: bool = False):
-        """带母线元件"""
+class WithBuses(VGroup):
+    def __init__(self,
+                 bus: bool = False,
+                 *vmobjects,
+                 **kwargs):
+        """
+        带母线元件
+        :param bus: 是否绘制母线
+        :param vmobjects: 同 VGroup
+        :param kwargs: 同 VGroup
+        """
+        super().__init__(*vmobjects, **kwargs)
         self._bus = bus
         self.lines: list[Line] = []
         self.buses: list[Bus] = []
@@ -95,7 +178,8 @@ class WithBuses:
         return self._bus
 
     @bus.setter
-    def bus(self, value: bool = True):
+    def bus(self,
+            value: bool = True):
         self._bus = value
         if self._bus:
             self._rectify_buses()
@@ -103,30 +187,37 @@ class WithBuses:
         else:
             self.remove(*self.buses)
 
-    def add_bus(self):
+    def show_bus(self):
         self._bus = True
         self._rectify_buses()
         return self.animate.add(*self.buses)
 
-    def remove_bus(self):
+    def hide_bus(self):
         self._bus = False
         return self.animate.remove(*self.buses)
 
 
-class Source(VGroup, WithBuses):
+class Source(WithBuses):
     def __init__(self,
                  bus: bool = False,
                  *vmobjects,
                  **kwargs):
-        """电源"""
-        super().__init__(*vmobjects, **kwargs)
+        """
+        电源
+        :param bus: 是否绘制母线
+        :param vmobjects: 同 VGroup
+        :param kwargs: 同 VGroup
+        """
+        super().__init__(bus, *vmobjects, **kwargs)
         # 电源符号
-        self.arc_up: Arc = Arc(RADICAL / 4, angle=TAU / 2, color=NORMAL_COLOR)
+        self.arc_up: Arc = Arc(CIRCLE_RADIUS / 4, angle=TAU / 2, color=NORMAL_COLOR)
         self.arc_down: Arc = self.arc_up.copy().rotate(180 * DEGREES).next_to(self.arc_up, DR, buff=0)
-        self.c1: Circle = Circle(RADICAL, color=WHITE)
+        self.circles: list[Circle] = [
+            Circle(CIRCLE_RADIUS, color=WHITE)
+        ]
         self.add(self.arc_up, self.arc_down)
         self.move_to(ORIGIN)
-        self.add(self.c1)
+        self.add(*self.circles)
         # 引出线与母线
         self.lines: list[Line] = [
             Line((0, 0, 0), (LINE_LENGTH, 0, 0)).next_to(self, RIGHT, buff=0)
@@ -139,25 +230,32 @@ class Source(VGroup, WithBuses):
         self.move_to(ORIGIN)
 
 
-class Transformer3(VGroup, WithBuses):
+class Transformer3(WithBuses):
     def __init__(self,
                  bus: bool = False,
                  *vmobjects,
                  **kwargs):
-        """三绕组变压器"""
-        super().__init__(*vmobjects, **kwargs)
+        """
+        三绕组变压器
+        :param bus: 是否绘制母线
+        :param vmobjects: 同 VGroup
+        :param kwargs: 同 VGroup
+        """
+        super().__init__(bus, *vmobjects, **kwargs)
         # 圆圈
         triangle = Triangle().scale(0.01)  # 用于给三绕组变压器三个圆圈定位 正三角形辅助作图 简单方便
-        self.c1: Circle = Circle(RADICAL, color=NORMAL_COLOR).next_to(triangle, UP, buff=-0.12)
-        self.c2: Circle = self.c1.copy().next_to(triangle, DL, buff=-0.12)
-        self.c3: Circle = self.c1.copy().next_to(triangle, DR, buff=-0.12)
-        self.add(self.c1, self.c2, self.c3)
+        self.circles: list[Circle] = [
+            Circle(CIRCLE_RADIUS, color=NORMAL_COLOR).next_to(triangle, DR, buff=-0.12),
+            Circle(CIRCLE_RADIUS, color=NORMAL_COLOR).next_to(triangle, UP, buff=-0.12),
+            Circle(CIRCLE_RADIUS, color=NORMAL_COLOR).next_to(triangle, DL, buff=-0.12)
+        ]
+        self.add(*self.circles)
         self.move_to(ORIGIN)
         # 引出线
         self.lines: list[Line] = [
-            Line(ORIGIN, [0, LINE_LENGTH, 0]).next_to(self.c1, UP, buff=0),
-            Line(ORIGIN, [-LINE_LENGTH, 0, 0]).next_to(self.c2, LEFT, buff=0),
-            Line(ORIGIN, [LINE_LENGTH, 0, 0]).next_to(self.c3, RIGHT, buff=0)
+            Line(ORIGIN, [LINE_LENGTH, 0, 0]).next_to(self.circles[0], RIGHT, buff=0),
+            Line(ORIGIN, [0, LINE_LENGTH, 0]).next_to(self.circles[1], UP, buff=0),
+            Line(ORIGIN, [-LINE_LENGTH, 0, 0]).next_to(self.circles[2], LEFT, buff=0)
         ]
         self.add(*self.lines)
         # 母线
@@ -167,21 +265,28 @@ class Transformer3(VGroup, WithBuses):
         self.move_to(ORIGIN)
 
 
-class Transformer2(VGroup, WithBuses):
+class Transformer2(WithBuses):
     def __init__(self,
                  bus: bool = False,
                  *vmobjects,
                  **kwargs):
-        """双绕组变压器"""
-        super().__init__(*vmobjects, **kwargs)
+        """
+        双绕组变压器
+        :param bus: 是否绘制母线
+        :param vmobjects: 同 VGroup
+        :param kwargs: 同 VGroup
+        """
+        super().__init__(bus, *vmobjects, **kwargs)
         # 圆圈
-        self.c1 = Circle(RADICAL, color=NORMAL_COLOR)
-        self.c2 = self.c1.copy().next_to(self.c1, LEFT, buff=-0.15)
-        self.add(self.c1, self.c2)
+        self.circles: list[Circle] = [
+            Circle(CIRCLE_RADIUS, color=NORMAL_COLOR)
+        ]
+        self.circles.append(self.circles[0].copy().next_to(self.circles[0], LEFT, buff=-0.15))
+        self.add(*self.circles)
         # 引出线
         self.lines: list[Line] = [
-            Line(ORIGIN, [LINE_LENGTH, 0, 0]).next_to(self.c1, RIGHT, buff=0),
-            Line(ORIGIN, [-LINE_LENGTH, 0, 0]).next_to(self.c2, LEFT, buff=0)
+            Line(ORIGIN, [LINE_LENGTH, 0, 0]).next_to(self.circles[0], RIGHT, buff=0),
+            Line(ORIGIN, [-LINE_LENGTH, 0, 0]).next_to(self.circles[1], LEFT, buff=0)
         ]
         self.add(*self.lines)
         # 母线
@@ -195,10 +300,14 @@ class Load(VGroup):
     def __init__(self,
                  *vmobjects,
                  **kwargs):
-        """负荷"""
+        """
+        负荷
+        :param vmobjects: 同 VGroup
+        :param kwargs: 同 VGroup
+        """
         super().__init__(*vmobjects, **kwargs)
         # 三角形
-        self.triangle = Triangle(color=NORMAL_COLOR).scale(TRIANGLE_SCALE).rotate(-90 * DEGREES)
+        self.triangle = Triangle(color=NORMAL_COLOR).scale(LOAD_TRIANGLE_SCALE).rotate(-90 * DEGREES)
         self.add(self.triangle)
         # 引出线
         self.lines: list[Line] = [
@@ -211,7 +320,11 @@ class Load(VGroup):
 
 class Gnd(VGroup):
     def __init__(self, *vmobjects, **kwargs):
-        """GND"""
+        """
+        GND
+        :param vmobjects: 同 VGroup
+        :param kwargs: 同 VGroup
+        """
         super().__init__(*vmobjects, **kwargs)
         # 引出线（竖向）
         self.lines: list[Line] = [
@@ -241,7 +354,7 @@ class ElementsDemo(Scene):
         t2 = Transformer2()
         t3 = Transformer3()
         load = Load()
-        gnd = Gnd()
+        gnd = Gnd().to_corner(UL)
 
         self.play(Create(induct, 0.1))
         self.wait()
@@ -262,7 +375,8 @@ class ElementsDemo(Scene):
                               cap.lines[1].get_left())))
         self.wait()
         self.play(t3.animate.scale(0.5))
-        self.play(t3.add_bus())
+        self.play(t3.show_bus())
+        self.play(FadeIn(gnd))
 
         self.wait(3)
 
@@ -292,14 +406,4 @@ class SimpleGraph(Scene):
         self.play(load.triangle.animate.set_color(NORMAL_COLOR))
 
         self.wait()
-
-
-class Power(Scene):
-    def construct(self):
-        v1 = Vector([2, 3])
-        v2 = Vector([4, 6])
-        label1 = v1.coordinate_label()
-        label2 = v2.coordinate_label()
-        plane = NumberPlane()
-        self.add(plane, v1, v2, label1, label2)
 
