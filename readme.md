@@ -1,6 +1,8 @@
-# Manim in electric engineering
+# Manim in electrical engineering
 
-通过Manim绘制电气工程相关的元件。
+基于**Manim社区版v0.18.1**。
+
+电气工程Manim（Manim in electrical engineering, ManimEE）旨在通过Manim绘制电气工程相关的元件，创作有关动画。
 
 # 效果图
 
