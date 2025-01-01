@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2024/12/30 下午9:23
 # @Author  : jensentsts
-# @File    : test.py
-# @Description : 效果测试文件
+# @File    : manimee.py
+# @Description : Manim in electric engineering
+# Manim 之于 电气工程
 from manim import *
 
 CIRCLE_RADIUS: float = 0.3                  # 圆形的默认半径
@@ -25,7 +26,7 @@ class Bus(Line):
         :param path_arc: 同 Line
         :param kwargs: 同 Line
         """
-        super().__init__(ORIGIN, [0, BUS_LENGTH, 0], buff, path_arc, **kwargs)
+        super().__init__(ORIGIN, (0, BUS_LENGTH, 0), buff, path_arc, **kwargs)
 
 
 class Voltage(Annulus):
@@ -77,8 +78,6 @@ class Voltage(Annulus):
         self._voltage = voltage
         self._rectify_radius()
 
-    def set_voltage(self, voltage: complex):
-
 
 class Impedance(VGroup):
     def __init__(self,
@@ -94,8 +93,8 @@ class Impedance(VGroup):
         self.rectangle: Rectangle = Rectangle(WHITE, LINE_LENGTH, LINE_LENGTH * 2.25)
         self.add(self.rectangle)
         # 引出线
-        self.lines: list[Line] = [Line(ORIGIN, [LINE_LENGTH, 0, 0]).next_to(self, RIGHT, buff=0),
-                                  Line(ORIGIN, [-LINE_LENGTH, 0, 0]).next_to(self, LEFT, buff=0)]
+        self.lines: list[Line] = [Line(ORIGIN, (LINE_LENGTH, 0, 0)).next_to(self, RIGHT, buff=0),
+                                  Line(ORIGIN, (-LINE_LENGTH, 0, 0)).next_to(self, LEFT, buff=0)]
         self.add(*self.lines)
 
         self.move_to(ORIGIN)
@@ -121,7 +120,7 @@ class Inductance(VGroup):
             self.arcs.append(arc)
         # 引出线
         self.lines: list[Line] = [
-            Line(ORIGIN, [LINE_LENGTH, 0, 0]).next_to(self, DR, buff=0), Line(ORIGIN, [-LINE_LENGTH, 0, 0]).next_to(self, DL, buff=0)
+            Line(ORIGIN, (LINE_LENGTH, 0, 0)).next_to(self, DR, buff=0), Line(ORIGIN, (-LINE_LENGTH, 0, 0)).next_to(self, DL, buff=0)
         ]
         self.add(*self.lines)
 
@@ -139,13 +138,13 @@ class Capacitor(VGroup):
         """
         super().__init__(*vmobjects, **kwargs)
         # 电容符号的极板
-        self.p1: Line = Line([LINE_LENGTH / 2, 0, 0], [LINE_LENGTH / 2, LINE_LENGTH * 2, 0])
-        self.p2: Line = Line(ORIGIN, [0, LINE_LENGTH * 2, 0])
+        self.p1: Line = Line((LINE_LENGTH / 2, 0, 0), (LINE_LENGTH / 2, LINE_LENGTH * 2, 0))
+        self.p2: Line = Line(ORIGIN, (0, LINE_LENGTH * 2, 0))
         self.add(self.p1, self.p2)
         self.move_to(ORIGIN)
         # 引出线
-        self.lines: list[Line] = [Line(ORIGIN, [LINE_LENGTH, 0, 0]).next_to(self.p1, RIGHT, buff=0),
-                                  Line(ORIGIN, [-LINE_LENGTH, 0, 0]).next_to(self.p2, LEFT, buff=0)]
+        self.lines: list[Line] = [Line(ORIGIN, (LINE_LENGTH, 0, 0)).next_to(self.p1, RIGHT, buff=0),
+                                  Line(ORIGIN, (-LINE_LENGTH, 0, 0)).next_to(self.p2, LEFT, buff=0)]
         self.add(*self.lines)
 
         self.move_to(ORIGIN)
@@ -253,9 +252,9 @@ class Transformer3(WithBuses):
         self.move_to(ORIGIN)
         # 引出线
         self.lines: list[Line] = [
-            Line(ORIGIN, [LINE_LENGTH, 0, 0]).next_to(self.circles[0], RIGHT, buff=0),
-            Line(ORIGIN, [0, LINE_LENGTH, 0]).next_to(self.circles[1], UP, buff=0),
-            Line(ORIGIN, [-LINE_LENGTH, 0, 0]).next_to(self.circles[2], LEFT, buff=0)
+            Line(ORIGIN, (LINE_LENGTH, 0, 0)).next_to(self.circles[0], RIGHT, buff=0),
+            Line(ORIGIN, (0, LINE_LENGTH, 0)).next_to(self.circles[1], UP, buff=0),
+            Line(ORIGIN, (-LINE_LENGTH, 0, 0)).next_to(self.circles[2], LEFT, buff=0)
         ]
         self.add(*self.lines)
         # 母线
@@ -285,8 +284,8 @@ class Transformer2(WithBuses):
         self.add(*self.circles)
         # 引出线
         self.lines: list[Line] = [
-            Line(ORIGIN, [LINE_LENGTH, 0, 0]).next_to(self.circles[0], RIGHT, buff=0),
-            Line(ORIGIN, [-LINE_LENGTH, 0, 0]).next_to(self.circles[1], LEFT, buff=0)
+            Line(ORIGIN, (LINE_LENGTH, 0, 0)).next_to(self.circles[0], RIGHT, buff=0),
+            Line(ORIGIN, (-LINE_LENGTH, 0, 0)).next_to(self.circles[1], LEFT, buff=0)
         ]
         self.add(*self.lines)
         # 母线
@@ -311,7 +310,7 @@ class Load(VGroup):
         self.add(self.triangle)
         # 引出线
         self.lines: list[Line] = [
-            Line(ORIGIN, [-LINE_LENGTH, 0, 0]).next_to(self.triangle, LEFT, buff=0)
+            Line(ORIGIN, (-LINE_LENGTH, 0, 0)).next_to(self.triangle, LEFT, buff=0)
         ]
         self.add(*self.lines)
 
@@ -328,13 +327,13 @@ class Gnd(VGroup):
         super().__init__(*vmobjects, **kwargs)
         # 引出线（竖向）
         self.lines: list[Line] = [
-            Line(ORIGIN, [0, LINE_LENGTH * 2 / 3, 0])
+            Line(ORIGIN, (0, LINE_LENGTH * 2 / 3, 0))
         ]
         self.add(*self.lines)
         # 三条横线（从长到短）
-        self.line_hor1 = Line(ORIGIN, [LINE_LENGTH * 4 / 3, 0, 0]).next_to(self.lines[0], DOWN, buff=0)
-        self.line_hor2 = Line(ORIGIN, [LINE_LENGTH * 2 / 3, 0, 0]).next_to(self.line_hor1, DOWN, buff=LINE_LENGTH / 4)
-        self.line_hor3 = Line(ORIGIN, [LINE_LENGTH / 2, 0, 0]).next_to(self.line_hor2, DOWN, buff=LINE_LENGTH / 4)
+        self.line_hor1 = Line(ORIGIN, (LINE_LENGTH * 3 / 3, 0, 0)).next_to(self.lines[0], DOWN, buff=0)
+        self.line_hor2 = Line(ORIGIN, (LINE_LENGTH * 2 / 3, 0, 0)).next_to(self.line_hor1, DOWN, buff=LINE_LENGTH / 4)
+        self.line_hor3 = Line(ORIGIN, (LINE_LENGTH * 1 / 3, 0, 0)).next_to(self.line_hor2, DOWN, buff=LINE_LENGTH / 4)
         self.add(self.line_hor1, self.line_hor2, self.line_hor3)
 
         self.move_to(ORIGIN)
@@ -344,66 +343,4 @@ class Scheme(VGroup):
     def __init__(self, *vmobjects, **kwargs):
         """Scheme"""
         super().__init__(*vmobjects, **kwargs)
-
-
-class ElementsDemo(Scene):
-    def construct(self):
-        induct = Inductance()
-        cap = Capacitor()
-        src = Source()
-        t2 = Transformer2()
-        t3 = Transformer3()
-        load = Load()
-        gnd = Gnd().to_corner(UL)
-
-        self.play(Create(induct, 0.1))
-        self.wait()
-        self.play(induct.animate.to_edge(UP))
-        self.play(Create(src, 0.1))
-        self.wait()
-        self.play(Create(t2.to_edge(RIGHT), 0.1))
-        self.play(Create(t3.to_edge(DOWN), 0.1))
-        self.wait()
-        self.play(Create(load.to_edge(LEFT), 0.1))
-        self.wait()
-        self.play(t3.animate.scale(2))
-        self.play(t3.animate.to_edge(DOWN))
-        self.wait()
-        self.play(src.animate.next_to(cap, LEFT),
-                  Create(cap))
-        self.play(Create(Line(src.lines[0].get_right(),
-                              cap.lines[1].get_left())))
-        self.wait()
-        self.play(t3.animate.scale(0.5))
-        self.play(t3.show_bus())
-        self.play(FadeIn(gnd))
-
-        self.wait(3)
-
-
-class T232(Scene):
-    def construct(self):
-        t2 = Transformer2(bus=False)
-        t22 = t2.copy()
-        t3 = Transformer3(bus=True)
-        self.add(t2)
-        self.play(Transform(t2, t3))
-        self.play(Transform(t2, t22))
-
-
-class SimpleGraph(Scene):
-    def construct(self):
-        ind = Inductance().to_edge(ORIGIN)
-        load = Load().next_to(ind.lines[0], RIGHT, buff=2)
-        src = Source(True).next_to(ind.lines[1], LEFT, buff=0)
-        load.triangle.set_color(WHITE)
-        VGroup(ind, load, src).move_to(ORIGIN).scale(2)
-        self.play(Create(src, 0.5),
-                  Create(Line(src.lines[0].get_right(), ind.lines[1].get_left())),
-                  Create(ind, 0.2),
-                  Create(load))
-        self.play(Create(Line(ind.lines[0].get_right(), load.lines[0].get_left())))
-        self.play(load.triangle.animate.set_color(NORMAL_COLOR))
-
-        self.wait()
 
