@@ -8,6 +8,8 @@
 
 ![效果图](./readme/img/demo_SimpleChart.png)
 
+![元件一览](./readme/img/demo_Elements.png)
+
 > 正在制作中……
 
 # TODO

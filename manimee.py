@@ -35,7 +35,7 @@ class Bus(Line):
         :param direction: 延长方向。取投影向量方向。
         :return: self
         """
-        direction.prod()
+
         return self
 
 
@@ -353,17 +353,52 @@ class AutoTransformer2(WithBuses):
         :param kwargs: 同 VGroup
         """
         super().__init__(bus, *vmobjects, **kwargs)
-        # 源泉
-        self.circle: Circle = Circle(CIRCLE_RADIUS, color=WHITE)
+        # 圆圈
+        self.circle: Circle = Circle(CIRCLE_RADIUS, color=NORMAL_COLOR)
         self.add(self.circle)
         # 弧线
-        self.arc: Arc = Arc(CIRCLE_RADIUS * AUTO_TRANSFORMER_ARC_RATE, start_angle=TAU*3/4, angle=TAU/4)
+        self.arc: Arc = Arc(CIRCLE_RADIUS * AUTO_TRANSFORMER_ARC_RATE, start_angle=TAU*3/4, angle=TAU/4, color=NORMAL_COLOR)
         self.arc.align_to(self.circle, DOWN)
         self.add(self.arc)
         # 引出线
         self.lines: list[Line] = [
             Line(ORIGIN, (LINE_LENGTH, 0, 0)).next_to(self, RIGHT, buff=0),
             Line(ORIGIN, (-LINE_LENGTH, 0, 0)).next_to(self.circle, LEFT, buff=0)
+        ]
+        self.add(*self.lines)
+
+        self.move_to(ORIGIN)
+
+
+class AutoTransformer3(WithBuses):
+    """
+    自耦三绕组变压器
+    """
+    def __init__(self,
+                 bus: bool = False,
+                 *vmobjects,
+                 **kwargs):
+        """
+        :param bus: 是否绘制母线
+        :param vmobjects: 同 VGroup
+        :param kwargs: 同 VGroup
+        """
+        super().__init__(bus, *vmobjects, **kwargs)
+        # 圆圈
+        self.circles: list[Circle] = [
+            Circle(CIRCLE_RADIUS, color=NORMAL_COLOR)
+        ]
+        self.circles.append(self.circles[0].copy().next_to(self.circles[0], LEFT, buff=-0.15))
+        self.add(*self.circles)
+        # 弧线
+        self.arc: Arc = Arc(CIRCLE_RADIUS * AUTO_TRANSFORMER_ARC_RATE, start_angle=TAU*3/4, angle=TAU/4, color=NORMAL_COLOR)
+        self.arc.align_to(self.circles[0], DOWN)
+        self.add(self.arc)
+        # 引出线
+        self.lines: list[Line] = [
+            Line(ORIGIN, (LINE_LENGTH, 0, 0)).next_to(self, RIGHT, buff=0),
+            Line(ORIGIN, (0, LINE_LENGTH, 0)).next_to(self.circles[0], UP, buff=0),
+            Line(ORIGIN, (-LINE_LENGTH, 0, 0)).next_to(self.circles[1], LEFT, buff=0)
         ]
         self.add(*self.lines)
 

@@ -50,6 +50,7 @@ class Elements(Scene):
             Transformer2(),
             Transformer3(),
             AutoTransformer2(),
+            AutoTransformer3(),
             Load(),
             Reactor(),
         )
