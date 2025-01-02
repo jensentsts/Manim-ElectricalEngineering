@@ -25,8 +25,7 @@ class SimpleChart(Scene):
         gnd = Gnd().next_to(c1.lines[1], DOWN, buff=0)
 
         # 手动调整母线长……
-        bus_start = t2.buses[0].get_start()
-        t2.buses[0].put_start_and_end_on((bus_start[0], bus_start[1] - LINE_LENGTH, bus_start[2]), t2.buses[0].get_end())
+        t2.buses[0].set_length(t2.buses[0].get_length() * 3)
         # 去掉t1电源测的母线
         t1.remove(t1.buses[1])
 
@@ -43,18 +42,18 @@ class Elements(Scene):
             Bus(),
             Gnd(),
             Voltage(),
+            Load(),
             Impedance(),
             Inductance(),
             Capacitor(),
+            Reactor(),
             Source(),
             Transformer2(),
-            Transformer3(),
             AutoTransformer2(),
             AutoTransformer3(),
-            Load(),
-            Reactor(),
+            Transformer3(),
         )
-        g.arrange_in_grid()
+        g.arrange_in_grid(buff=0.5)
         self.add(g)
 
 

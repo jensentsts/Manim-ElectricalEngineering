@@ -4,46 +4,40 @@
 # @File    : manimee.py
 # @Description : Manim in electrical engineering. 电气工程Manim。
 from manim import *
-from manim.typing import Vector3D
 
-CIRCLE_RADIUS: float = 0.3                  # 圆形的默认半径
-LINE_LENGTH: float = 0.3                    # 引出线默认长度
-BUS_LENGTH: float = CIRCLE_RADIUS * 1.6     # 母线默认长度
-LOAD_TRIANGLE_SCALE: float = 0.15           # 负荷符号三角形 相对于 Manim默认三角形 的缩放比例
-VOLTAGE_OUTER_RADIUS: float = 0.1           # 电压圆环默认外径
-AUTO_TRANSFORMER_ARC_RATE: float = 1.4      # 自耦变压器弧线的半径对于CIRCLE_RADIUS的倍率
+CIRCLE_RADIUS: float = 0.3  # 圆形的默认半径
+LINE_LENGTH: float = 0.3  # 引出线默认长度
+BUS_LENGTH: float = CIRCLE_RADIUS * 1.6  # 母线默认长度
+LOAD_TRIANGLE_SCALE: float = 0.15  # 负荷符号三角形 相对于 Manim默认三角形 的缩放比例
+VOLTAGE_OUTER_RADIUS: float = 0.1  # 电压圆环默认外径
+AUTO_TRANSFORMER_ARC_RATE: float = 1.4  # 自耦变压器弧线的半径对于CIRCLE_RADIUS的倍率
 
-NORMAL_COLOR: ManimColor = YELLOW_D         # 特殊颜色的默认颜色
+NORMAL_COLOR: ManimColor = YELLOW_D  # 特殊颜色的默认颜色
 
 
 class Bus(Line):
     """
     母线
     """
+
     def __init__(self,
+                 length: float = BUS_LENGTH,
                  buff=0,
                  path_arc=None,
-                 **kwargs):
-        super().__init__(ORIGIN, (0, BUS_LENGTH, 0), buff, path_arc, **kwargs)
-
-    def prolong(self,
-                length: float,
-                direction: Vector3D = DOWN):
-        """
-        延长
-        :param length: 长度
-        :param direction: 延长方向。取投影向量方向。
-        :return: self
-        """
-
-        return self
+                 **kwargs
+                 ):
+        super().__init__(ORIGIN, (0, length, 0), buff, path_arc, **kwargs)
 
 
 class Gnd(VGroup):
     """
     GND
     """
-    def __init__(self, *vmobjects, **kwargs):
+
+    def __init__(self,
+                 *vmobjects,
+                 **kwargs
+                 ):
         """
         :param vmobjects: 同 VGroup
         :param kwargs: 同 VGroup
@@ -67,9 +61,11 @@ class Voltage(Annulus):
     """
     可视化电压电压，效果为圆环，外径反应电压数值大小，内径反应电压横分量大小。
     """
+
     def __init__(self,
                  voltage_level: float = 0,
-                 voltage: complex = 0):
+                 voltage: complex = 0
+                 ):
         """
         电压可视化
         :param voltage_level: 电压等级
@@ -100,7 +96,8 @@ class Voltage(Annulus):
 
     @voltage_level.setter
     def voltage_level(self,
-                      voltage_level: float):
+                      voltage_level: float
+                      ):
         self._voltage_level = voltage_level
         self._rectify_radius()
 
@@ -111,7 +108,8 @@ class Voltage(Annulus):
 
     @voltage.setter
     def voltage(self,
-                voltage: complex):
+                voltage: complex
+                ):
         self._voltage = voltage
         self._rectify_radius()
 
@@ -120,6 +118,7 @@ class Impedance(VGroup):
     """
     电阻/阻抗/导纳
     """
+
     def __init__(self,
                  *vmobjects,
                  **kwargs):
@@ -139,10 +138,12 @@ class Inductance(VGroup):
     """
     电感
     """
+
     def __init__(self,
                  arc_amount: int = 5,
                  *vmobjects,
-                 **kwargs):
+                 **kwargs
+                 ):
         """
         :param arc_amount: 圆弧数量
         :param vmobjects: 同 VGroup
@@ -169,9 +170,11 @@ class Capacitor(VGroup):
     """
     电容
     """
+
     def __init__(self,
                  *vmobjects,
-                 **kwargs):
+                 **kwargs
+                 ):
         super().__init__(*vmobjects, **kwargs)
         # 电容符号的极板
         self.p1: Line = Line((LINE_LENGTH / 2, 0, 0), (LINE_LENGTH / 2, LINE_LENGTH * 2, 0))
@@ -190,10 +193,12 @@ class WithBuses(VGroup):
     """
     带母线元件基类
     """
+
     def __init__(self,
                  bus: bool = False,
                  *vmobjects,
-                 **kwargs):
+                 **kwargs
+                 ):
         """
         :param bus: 是否绘制母线
         :param vmobjects: 同 VGroup
@@ -216,7 +221,8 @@ class WithBuses(VGroup):
 
     @bus.setter
     def bus(self,
-            value: bool = True):
+            value: bool = True
+            ):
         self._bus = value
         if self._bus:
             self._rectify_buses()
@@ -238,10 +244,12 @@ class Source(WithBuses):
     """
     电源
     """
+
     def __init__(self,
                  bus: bool = False,
                  *vmobjects,
-                 **kwargs):
+                 **kwargs
+                 ):
         """
         :param bus: 是否绘制母线
         :param vmobjects: 同 VGroup
@@ -273,10 +281,12 @@ class Transformer2(WithBuses):
     """
     双绕组变压器
     """
+
     def __init__(self,
                  bus: bool = False,
                  *vmobjects,
-                 **kwargs):
+                 **kwargs
+                 ):
         """
         :param bus: 是否绘制母线
         :param vmobjects: 同 VGroup
@@ -306,10 +316,12 @@ class Transformer3(WithBuses):
     """
     三绕组变压器
     """
+
     def __init__(self,
                  bus: bool = False,
                  *vmobjects,
-                 **kwargs):
+                 **kwargs
+                 ):
         """
         :param bus: 是否绘制母线
         :param vmobjects: 同 VGroup
@@ -343,10 +355,12 @@ class AutoTransformer2(WithBuses):
     """
     自耦双绕组变压器
     """
+
     def __init__(self,
                  bus: bool = False,
                  *vmobjects,
-                 **kwargs):
+                 **kwargs
+                 ):
         """
         :param bus: 是否绘制母线
         :param vmobjects: 同 VGroup
@@ -357,7 +371,7 @@ class AutoTransformer2(WithBuses):
         self.circle: Circle = Circle(CIRCLE_RADIUS, color=NORMAL_COLOR)
         self.add(self.circle)
         # 弧线
-        self.arc: Arc = Arc(CIRCLE_RADIUS * AUTO_TRANSFORMER_ARC_RATE, start_angle=TAU*3/4, angle=TAU/4, color=NORMAL_COLOR)
+        self.arc: Arc = Arc(CIRCLE_RADIUS * AUTO_TRANSFORMER_ARC_RATE, start_angle=TAU * 3 / 4, angle=TAU / 4, color=NORMAL_COLOR)
         self.arc.align_to(self.circle, DOWN)
         self.add(self.arc)
         # 引出线
@@ -374,10 +388,12 @@ class AutoTransformer3(WithBuses):
     """
     自耦三绕组变压器
     """
+
     def __init__(self,
                  bus: bool = False,
                  *vmobjects,
-                 **kwargs):
+                 **kwargs
+                 ):
         """
         :param bus: 是否绘制母线
         :param vmobjects: 同 VGroup
@@ -391,7 +407,7 @@ class AutoTransformer3(WithBuses):
         self.circles.append(self.circles[0].copy().next_to(self.circles[0], LEFT, buff=-0.15))
         self.add(*self.circles)
         # 弧线
-        self.arc: Arc = Arc(CIRCLE_RADIUS * AUTO_TRANSFORMER_ARC_RATE, start_angle=TAU*3/4, angle=TAU/4, color=NORMAL_COLOR)
+        self.arc: Arc = Arc(CIRCLE_RADIUS * AUTO_TRANSFORMER_ARC_RATE, start_angle=TAU * 3 / 4, angle=TAU / 4, color=NORMAL_COLOR)
         self.arc.align_to(self.circles[0], DOWN)
         self.add(self.arc)
         # 引出线
@@ -409,9 +425,11 @@ class Load(VGroup):
     """
     负荷
     """
+
     def __init__(self,
                  *vmobjects,
-                 **kwargs):
+                 **kwargs
+                 ):
         super().__init__(*vmobjects, **kwargs)
         # 三角形
         self.triangle = Triangle(color=NORMAL_COLOR).scale(LOAD_TRIANGLE_SCALE).rotate(-90 * DEGREES)
@@ -429,9 +447,11 @@ class Reactor(VGroup):
     """
     电抗器
     """
+
     def __init__(self,
                  *vmobjects,
-                 **kwargs):
+                 **kwargs
+                 ):
         super().__init__(*vmobjects, **kwargs)
         # 3/4圆弧
         self.arc: Arc = Arc(CIRCLE_RADIUS, 0, TAU * 3 / 4)
@@ -443,8 +463,8 @@ class Reactor(VGroup):
         self.add(self.right_angle)
         # 引出线
         self.lines: list[Line] = [
-            Line((CIRCLE_RADIUS, 0, 0), (2*CIRCLE_RADIUS, 0, 0)),
-            Line((-CIRCLE_RADIUS, 0, 0), (-2*CIRCLE_RADIUS, 0, 0))
+            Line((CIRCLE_RADIUS, 0, 0), (2 * CIRCLE_RADIUS, 0, 0)),
+            Line((-CIRCLE_RADIUS, 0, 0), (-2 * CIRCLE_RADIUS, 0, 0))
         ]
         self.add(*self.lines)
 
@@ -455,6 +475,9 @@ class Scheme(VGroup):
     """
     Scheme
     """
-    def __init__(self, *vmobjects, **kwargs):
-        super().__init__(*vmobjects, **kwargs)
 
+    def __init__(self,
+                 *vmobjects,
+                 **kwargs
+                 ):
+        super().__init__(*vmobjects, **kwargs)
