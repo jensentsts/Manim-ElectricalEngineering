@@ -49,9 +49,9 @@ class Gnd(VGroup):
         ]
         self.add(*self.lines)
         # 三条横线（从长到短）
-        self.line_hor1 = Line(ORIGIN, (LINE_LENGTH * 3 / 3, 0, 0)).next_to(self.lines[0], DOWN, buff=0)
-        self.line_hor2 = Line(ORIGIN, (LINE_LENGTH * 2 / 3, 0, 0)).next_to(self.line_hor1, DOWN, buff=LINE_LENGTH / 4)
-        self.line_hor3 = Line(ORIGIN, (LINE_LENGTH * 1 / 3, 0, 0)).next_to(self.line_hor2, DOWN, buff=LINE_LENGTH / 4)
+        self.line_hor1 = Line(ORIGIN, (-LINE_LENGTH * 3 / 3, 0, 0)).next_to(self.lines[0], DOWN, buff=0)
+        self.line_hor2 = Line(ORIGIN, (-LINE_LENGTH * 2 / 3, 0, 0)).next_to(self.line_hor1, DOWN, buff=LINE_LENGTH / 4)
+        self.line_hor3 = Line(ORIGIN, (-LINE_LENGTH * 1 / 3, 0, 0)).next_to(self.line_hor2, DOWN, buff=LINE_LENGTH / 4)
         self.add(self.line_hor1, self.line_hor2, self.line_hor3)
 
         self.move_to(ORIGIN)
@@ -86,7 +86,7 @@ class Voltage(Annulus):
             if self.voltage.real == 0:
                 self.inner_radius = self.outer_radius - 0.001
             else:
-                self.inner_radius = self.voltage.imag / self.voltage.real * self.outer_radius
+                self.inner_radius = self.voltage.imag / abs(self.voltage) * self.outer_radius
         self.generate_points()
 
     @property
@@ -113,6 +113,11 @@ class Voltage(Annulus):
         self._voltage = voltage
         self._rectify_radius()
 
+    def set_voltage(self, voltage: complex):
+        self._voltage = voltage
+        self._rectify_radius()
+        return self
+
 
 class Impedance(VGroup):
     """
@@ -124,7 +129,7 @@ class Impedance(VGroup):
                  **kwargs):
         super().__init__(*vmobjects, **kwargs)
         # 阻抗符号（主体）
-        self.rectangle: Rectangle = Rectangle(WHITE, LINE_LENGTH, LINE_LENGTH * 2.25)
+        self.rectangle: Rectangle = Rectangle(WHITE, LINE_LENGTH*0.75, LINE_LENGTH*1.6)
         self.add(self.rectangle)
         # 引出线
         self.lines: list[Line] = [Line(ORIGIN, (LINE_LENGTH, 0, 0)).next_to(self, RIGHT, buff=0),
@@ -273,6 +278,56 @@ class Source(WithBuses):
         # 母线
         self.buses: list[Bus] = [Bus()]
         self.bus = bus
+
+        self.move_to(ORIGIN)
+
+
+class VoltageSource(VGroup):
+    """
+    电压源
+    """
+    def __init__(self,
+                 *vmobjects,
+                 **kwargs
+                 ):
+        super().__init__(*vmobjects, **kwargs)
+        # 圆圈
+        self.circles: list[Circle] = [Circle(CIRCLE_RADIUS, color=NORMAL_COLOR)]
+        self.add(*self.circles)
+        # 内部直线
+        self.inner_line: Line = Line(self.circles[0].get_left(), self.circles[0].get_right(), color=NORMAL_COLOR)
+        self.add(self.inner_line)
+        # 引出线
+        self.lines: list[Line] = [
+            Line(ORIGIN, (LINE_LENGTH, 0, 0)).next_to(self, RIGHT, buff=0),
+            Line(ORIGIN, (-LINE_LENGTH, 0, 0)).next_to(self, LEFT, buff=0),
+        ]
+        self.add(*self.lines)
+
+        self.move_to(ORIGIN)
+
+
+class CurrentSource(VGroup):
+    """
+    电流源
+    """
+    def __init__(self,
+                 *vmobjects,
+                 **kwargs
+                 ):
+        super().__init__(*vmobjects, **kwargs)
+        # 圆圈
+        self.circles: list[Circle] = [Circle(CIRCLE_RADIUS, color=NORMAL_COLOR)]
+        self.add(*self.circles)
+        # 内部直线
+        self.inner_line: Line = Line(self.circles[0].get_bottom(), self.circles[0].get_top(), color=NORMAL_COLOR)
+        self.add(self.inner_line)
+        # 引出线
+        self.lines: list[Line] = [
+            Line(ORIGIN, (LINE_LENGTH, 0, 0)).next_to(self, RIGHT, buff=0),
+            Line(ORIGIN, (-LINE_LENGTH, 0, 0)).next_to(self, LEFT, buff=0),
+        ]
+        self.add(*self.lines)
 
         self.move_to(ORIGIN)
 
@@ -481,3 +536,12 @@ class Scheme(VGroup):
                  **kwargs
                  ):
         super().__init__(*vmobjects, **kwargs)
+
+    def add_element(self):
+        """添加元件"""
+        return self
+
+    def remove_element(self):
+        """删除元件"""
+        return self
+
