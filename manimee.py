@@ -113,6 +113,17 @@ class Voltage(Annulus):
         self._voltage = voltage
         self._rectify_radius()
 
+    def get_voltage_level(self) -> float:
+        return self._voltage_level
+
+    def set_voltage_level(self, voltage_level: float):
+        self._voltage_level = voltage_level
+        
+        return self
+
+    def get_voltage(self) -> complex:
+        return self._voltage
+
     def set_voltage(self, voltage: complex):
         self._voltage = voltage
         self._rectify_radius()
